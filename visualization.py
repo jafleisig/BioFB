@@ -98,8 +98,27 @@ def plot_fft_frame(N, T, stomach_fft, chest_fft, fig, ax, stomach, chest, window
     ax[4].set_ylim([0, 1])  # Motor is only on (1) or off (0)
     ax[4].set_ylabel("Motor")
     for j in motors[1:]:  # For all of the times that a motor pulse starts
-        # Add a black rectangle of width 10000 (~5 seconds I think?)
-        ax[4].add_patch(Rectangle((j*window_step*200+window_size*200, 0),  # Lower left point of rectangle
+        if j < 0:
+            j = -j
+            # Add three red rectangles of width 1000
+            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200, 0),  # Lower left point of rectangle
+                               1000, 1,  # Width, height of rectangle
+                               fc='r',  # Fill colour
+                               ec='r',  # Edge colour
+                               lw=1))  # Line width
+            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200 + 4000, 0),  # Lower left point of rectangle
+                               1000, 1,  # Width, height of rectangle
+                               fc='r',  # Fill colour
+                               ec='r',  # Edge colour
+                               lw=1))  # Line width
+            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200 + 8000, 0),  # Lower left point of rectangle
+                               1000, 1,  # Width, height of rectangle
+                               fc='r',  # Fill colour
+                               ec='r',  # Edge colour
+                               lw=1))  # Line width                                     
+        else:
+            # Add a black rectangle of width 10000 (~5 seconds I think?)
+            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200, 0),  # Lower left point of rectangle
                                10000, 1,  # Width, height of rectangle
                                fc='k',  # Fill colour
                                ec='k',  # Edge colour

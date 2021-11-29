@@ -2,6 +2,7 @@ import pandas as pd
 import visualization
 from scipy.fft import fft, fftfreq
 import numpy as np
+from scipy.signal import find_peaks
 
 # Read the CSV
 breathing_filtered = pd.read_csv("breathing_filtered.csv")
@@ -43,8 +44,17 @@ for i in range(int(len(stomach_data)/window_step)-10):
     N = len(stomach_sample)  # Number of points within the sample
 
     # If max power of chest is greater than 10 and there hasnt been a stimulus in the last 10 iterations
-    if (max(2.0 / N * np.abs(chest_fft[0:N // 2])) > 10) and ((len(motors) == 1) or (motors[-1] < i-10)):
+    if (max(2.0 / N * np.abs(chest_fft[0:N // 2])) > 10) and ((len(motors) == 1) or (abs(motors[-1]) < i-10)):
         motors = motors + [i]  # Record this as a motor start time
+
+    # If breathing rate is more than x breaths/minute, triple buzz
+    x = 5
+    peaks = find_peaks(stomach_sample, height = 0, distance = None)
+    rate = peaks[0].size/(len(stomach_sample)/200)
+    print(rate)
+    if (rate > x) and ((len(motors) == 1) or (abs(motors[-1]) < i-10)):
+        motors = motors + [-i]
+
 
     # Plot the FFTs, time domain data, and motor pulses in the same plot
     visualization.plot_fft_frame(N, time_step, stomach_fft, chest_fft, fft_fig, fft_ax, stomach_data, chest_data,
