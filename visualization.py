@@ -4,7 +4,16 @@ import numpy as np
 from matplotlib.patches import Rectangle
 
 
-def plot_csv(stomach, chest, time_array):
+def get_event_times(event_array, time_array):
+    event_times = []
+    event_list = event_array.tolist()
+    for i in range(1, len(event_list)):
+        if (event_list[i] - event_list[i-1]) != 0:
+            event_times = event_times + [time_array[i]]
+    return event_times
+
+
+def plot_csv(stomach, chest, time_array, vlines):
     # Plot the time domain data from both channels
     # Create plot with 2 subplots sharing the same x axis
     fig, ax = plt.subplots(2, sharex=True)
@@ -13,25 +22,19 @@ def plot_csv(stomach, chest, time_array):
     ax[0].plot(time_array, chest)
     ax[0].set_title("Breathing Sample (BioRadio)")
     ax[0].set_ylabel("Chest")
-    # Vertical lines delineating different behaviour regions
-    ax[0].axvline(32.5, color='k', ls='--')
-    ax[0].axvline(60.15, color='k', ls='--')
-    ax[0].axvline(85, color='k', ls='--')
-    ax[0].axvline(92.5, color='k', ls='--')
-    ax[0].axvline(117.5, color='k', ls='--')
 
     # On bottom plot, plot the stomach
     ax[1].plot(time_array, stomach)
-    # Vertical lines delineating different behaviour regions
-    ax[1].axvline(32.5, color='k', ls='--')
-    ax[1].axvline(60.15, color='k', ls='--')
-    ax[1].axvline(85, color='k', ls='--')
-    ax[1].axvline(92.5, color='k', ls='--')
-    ax[1].axvline(117.5, color='k', ls='--')
     ax[1].set_xlabel("Time (s)")
     ax[1].set_ylabel("Stomach")
 
-    plt.xlim([0, 131])  # Set xlimits to be entire recording
+    # Vertical lines delineating different behaviour regions
+    if vlines:
+        for i in vlines:
+            ax[0].axvline(i, color='k', ls='--')
+            ax[1].axvline(i, color='k', ls='--')
+
+    plt.xlim([0, time_array[-1]])  # Set xlimits to be entire recording
     fig.supxlabel("Chest Breathing")
     plt.show()  # Display the plot
 

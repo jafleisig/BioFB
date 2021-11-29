@@ -5,7 +5,8 @@ from scipy.signal import find_peaks
 import numpy as np
 
 # Read the CSV
-breathing_filtered = pd.read_csv("breathing_filtered.csv")
+breathing_filtered = pd.read_csv("JacquieData1_20211126.csv")
+# breathing_filtered = pd.read_csv("breathing_filtered.csv")
 # The original data is sampled at 2 kHz, this is way more than we need, so take only every 200 points (10 Hz)
 breathing_filtered_sparse = breathing_filtered[0::200]
 
@@ -17,15 +18,18 @@ sample_rate = 10  # Sample rate in Hz (which is now 10 since we've taken every 2
 time_points = [float(i/sample_rate) for i in range(len(breathing_filtered_sparse))]  # Generate time points
 time_step = 1.0/100  # Time between each data point
 max_time = len(time_points)/time_step  # Max time of the entire recording
+# Labels: 0 (regular), 1 (chest), 2 (diaphragm), 3 (high freq motion), 4 (low freq motion)
+events = breathing_filtered_sparse["Event"]
+event_times = visualization.get_event_times(events, time_points)
 # Plot the data in the time domain for both channels
-# visualization.plot_csv(stomach_data, chest_data, time_points)
+visualization.plot_csv(stomach_data, chest_data, time_points, event_times)
 
 # Overall fft plot
 stomach_fft = fft(stomach_data.tolist())  # fft from stomach channel
 chest_fft = fft(chest_data.tolist())  # fft from chest channel
 N = len(stomach_data)  # Number of data points
 # Plot the fft for the entire time
-# visualization.plot_fft(N, time_step, stomach_fft, chest_fft)
+visualization.plot_fft(N, time_step, stomach_fft, chest_fft)
 
 # Moving recordings
 fft_fig, fft_ax = visualization.initialize_fft_frame()  # Initialize the figure
