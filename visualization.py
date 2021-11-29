@@ -4,34 +4,34 @@ import numpy as np
 from matplotlib.patches import Rectangle
 
 
-def plot_csv(stomach, chest):
+def plot_csv(stomach, chest, time_array):
     # Plot the time domain data from both channels
     # Create plot with 2 subplots sharing the same x axis
     fig, ax = plt.subplots(2, sharex=True)
 
     # On top plot, plot the chest
-    ax[0].plot(chest)
+    ax[0].plot(time_array, chest)
     ax[0].set_title("Breathing Sample (BioRadio)")
     ax[0].set_ylabel("Chest")
     # Vertical lines delineating different behaviour regions
-    ax[0].axvline(65000, color='k', ls='--')
-    ax[0].axvline(123000, color='k', ls='--')
-    ax[0].axvline(170000, color='k', ls='--')
-    ax[0].axvline(185000, color='k', ls='--')
-    ax[0].axvline(235000, color='k', ls='--')
+    ax[0].axvline(32.5, color='k', ls='--')
+    ax[0].axvline(60.15, color='k', ls='--')
+    ax[0].axvline(85, color='k', ls='--')
+    ax[0].axvline(92.5, color='k', ls='--')
+    ax[0].axvline(117.5, color='k', ls='--')
 
     # On bottom plot, plot the stomach
-    ax[1].plot(stomach)
+    ax[1].plot(time_array, stomach)
     # Vertical lines delineating different behaviour regions
-    ax[1].axvline(65000, color='k', ls='--')
-    ax[1].axvline(123000, color='k', ls='--')
-    ax[1].axvline(170000, color='k', ls='--')
-    ax[1].axvline(185000, color='k', ls='--')
-    ax[1].axvline(235000, color='k', ls='--')
+    ax[1].axvline(32.5, color='k', ls='--')
+    ax[1].axvline(60.15, color='k', ls='--')
+    ax[1].axvline(85, color='k', ls='--')
+    ax[1].axvline(92.5, color='k', ls='--')
+    ax[1].axvline(117.5, color='k', ls='--')
     ax[1].set_xlabel("Time (s)")
     ax[1].set_ylabel("Stomach")
 
-    plt.xlim([0, 262000])  # Set xlimits to be entire recording
+    plt.xlim([0, 131])  # Set xlimits to be entire recording
     fig.supxlabel("Chest Breathing")
     plt.show()  # Display the plot
 
@@ -43,10 +43,12 @@ def plot_fft(N, T, stomach_fft, chest_fft):
     ax[0].plot(x_freq, 2.0 / N * np.abs(chest_fft[0:N // 2]))  # Plot amplitude of chest FFT on first left plot
     ax[0].set_xlabel("Chest")
     ax[0].grid()  # Show the grid
+    ax[0].set_xlim([0, 30])
 
     ax[1].plot(x_freq, 2.0 / N * np.abs(stomach_fft[0:N // 2]))  # Plot amplitude of stomach FFT on first left plot
     ax[1].set_xlabel("Stomach")
     ax[1].grid()  # Show the grid
+    ax[1].set_xlim([0, 30])
 
     # Overall titles and labels for the entire figure
     fig.supxlabel("Frequency (Hz)")
@@ -66,63 +68,64 @@ def initialize_fft_frame():
     ax[3] = fig.add_subplot(4, 2, (5, 6), sharex=ax[2])  # Add subplot in 5th-6th index of a 4 row x 2 column grid (for stomach time data)
     ax[4] = fig.add_subplot(4, 2, (7, 8), sharex=ax[2])  # Add subplot in 7th-8th index of a 4 row x 2 column grid (for motor pulses)
     fig.suptitle("Fast Fourier Transform Over Time")
+    fig.supxlabel("Time (s)")
     return fig, ax
 
 
-def plot_fft_frame(N, T, stomach_fft, chest_fft, fig, ax, stomach, chest, window_step, window_size, i, motors):
+def plot_fft_frame(N, stomach_fft, chest_fft, freqs, ax, stomach, chest, time_array,
+                   window_step, window_size, i, motors):
 
-    # Plot fourier's
-    x_freq = fftfreq(N, T)[:N // 2]  # x frequencies from online example
     # Plot magnitude of chest and stomach FFTs on zeroth and first axis objects
-    ax[0].plot(x_freq, 2.0 / N * np.abs(chest_fft[0:N // 2]), 'b')
-    ax[1].plot(x_freq, 2.0 / N * np.abs(stomach_fft[0:N // 2]), 'b')
+    ax[0].plot(freqs, 2.0 / N * np.abs(chest_fft[0:N // 2]), 'b')
+    ax[1].plot(freqs, 2.0 / N * np.abs(stomach_fft[0:N // 2]), 'b')
     ax[0].grid()
     ax[0].set_ylim([0, 20])
-    ax[0].set_xlim([0, 100])
+    ax[0].set_xlim([0, 30])
     ax[0].set_title("Chest")
     ax[1].grid()
     ax[1].set_title("Stomach")
-    ax[1].set_xlim([0, 100])
+    ax[1].set_xlim([0, 30])
 
     # Plot time domain data from two data channels on 2nd and 3rd axis objects
-    ax[2].plot(chest)
+    ax[2].plot(time_array, chest)
     ax[2].set_ylabel("Chest")
-    ax[2].axvline(i*window_step*200, color='k', ls='--')  # Vertical line for beginning of window
-    ax[2].axvline(i*window_step*200+window_size*200, color='k', ls='--')  # Vertical line for end of window
-    ax[3].plot(stomach)
+    ax[2].axvline(i*window_step, color='k', ls='--')  # Vertical line for beginning of window
+    ax[2].axvline(i*window_step+window_size, color='k', ls='--')  # Vertical line for end of window
+    ax[2].set_xlim([0, time_array[-1]])
+    ax[3].plot(time_array, stomach)
     ax[3].set_ylabel("Stomach")
-    ax[3].axvline(i*window_step*200, color='k', ls='--')  # Vertical line for beginning of window
-    ax[3].axvline(i*window_step*200+window_size*200, color='k', ls='--')  # Vertical line for end of window
+    ax[3].axvline(i*window_step, color='k', ls='--')  # Vertical line for beginning of window
+    ax[3].axvline(i*window_step+window_size, color='k', ls='--')  # Vertical line for end of window
 
     # Add motor pulses as rectangles on the last axis object
     ax[4].set_ylim([0, 1])  # Motor is only on (1) or off (0)
     ax[4].set_ylabel("Motor")
     for j in motors[1:]:  # For all of the times that a motor pulse starts
-        if j < 0:
+        if j < 0:  # Signal is that breathing rate is too high, do three short pulses
             j = -j
             # Add three red rectangles of width 1000
-            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200, 0),  # Lower left point of rectangle
-                               1000, 1,  # Width, height of rectangle
+            ax[4].add_patch(Rectangle((j*window_step+window_size, 0),  # Lower left point of rectangle
+                               0.5, 1,  # Width, height of rectangle
                                fc='r',  # Fill colour
                                ec='r',  # Edge colour
                                lw=1))  # Line width
-            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200 + 4000, 0),  # Lower left point of rectangle
-                               1000, 1,  # Width, height of rectangle
+            ax[4].add_patch(Rectangle((j*window_step+window_size + 2, 0),  # Lower left point of rectangle
+                               0.5, 1,  # Width, height of rectangle
                                fc='r',  # Fill colour
                                ec='r',  # Edge colour
                                lw=1))  # Line width
-            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200 + 8000, 0),  # Lower left point of rectangle
-                               1000, 1,  # Width, height of rectangle
+            ax[4].add_patch(Rectangle((j*window_step+window_size + 4, 0),  # Lower left point of rectangle
+                               0.5, 1,  # Width, height of rectangle
                                fc='r',  # Fill colour
                                ec='r',  # Edge colour
-                               lw=1))  # Line width                                     
-        else:
-            # Add a black rectangle of width 10000 (~5 seconds I think?)
-            ax[4].add_patch(Rectangle((j*window_step*200+window_size*200, 0),  # Lower left point of rectangle
-                               10000, 1,  # Width, height of rectangle
-                               fc='k',  # Fill colour
-                               ec='k',  # Edge colour
                                lw=1))  # Line width
+
+        else:  # Signal is that chest breathing is too much, do one pulse
+            ax[4].add_patch(Rectangle((j*window_step+window_size, 0),  # Lower left point of rectangle
+                                   2, 1,  # Width, height of rectangle
+                                   fc='k',  # Fill colour
+                                   ec='k',  # Edge colour
+                                   lw=1))  # Line width
 
     plt.draw()  # Draw all of the plots onto the figure
     plt.pause(0.1)  # Wait for a tenth of a second
