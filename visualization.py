@@ -75,7 +75,7 @@ def initialize_fft_frame():
     return fig, ax
 
 
-def plot_fft_frame(N, stomach_fft, chest_fft, freqs, ax, stomach, chest, time_array,
+def plot_fft_frame(N, stomach_fft, chest_fft, freqs, ax, stomach, chest, time_array, vlines,
                    window_step, window_size, i, motors):
 
     # Plot magnitude of chest and stomach FFTs on zeroth and first axis objects
@@ -92,13 +92,19 @@ def plot_fft_frame(N, stomach_fft, chest_fft, freqs, ax, stomach, chest, time_ar
     # Plot time domain data from two data channels on 2nd and 3rd axis objects
     ax[2].plot(time_array, chest)
     ax[2].set_ylabel("Chest")
-    ax[2].axvline(i*window_step, color='k', ls='--')  # Vertical line for beginning of window
-    ax[2].axvline(i*window_step+window_size, color='k', ls='--')  # Vertical line for end of window
+    ax[2].axvline(i*window_step, color='g', ls='--')  # Vertical line for beginning of window
+    ax[2].axvline(i*window_step+window_size, color='g', ls='--')  # Vertical line for end of window
     ax[2].set_xlim([0, time_array[-1]])
     ax[3].plot(time_array, stomach)
     ax[3].set_ylabel("Stomach")
-    ax[3].axvline(i*window_step, color='k', ls='--')  # Vertical line for beginning of window
-    ax[3].axvline(i*window_step+window_size, color='k', ls='--')  # Vertical line for end of window
+    ax[3].axvline(i*window_step, color='g', ls='--')  # Vertical line for beginning of window
+    ax[3].axvline(i*window_step+window_size, color='g', ls='--')  # Vertical line for end of window
+
+    # Vertical lines delineating different behaviour regions
+    if vlines:
+        for i in vlines:
+            ax[2].axvline(i, color='k', ls='--')
+            ax[3].axvline(i, color='k', ls='--')
 
     # Add motor pulses as rectangles on the last axis object
     ax[4].set_ylim([0, 1])  # Motor is only on (1) or off (0)

@@ -1,18 +1,24 @@
 import pandas as pd
 import visualization
 from scipy.fft import fft, fftfreq
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, butter, sosfilt
 import numpy as np
 
 # Read the CSV
-breathing_filtered = pd.read_csv("JacquieData1_20211126.csv")
-# breathing_filtered = pd.read_csv("breathing_filtered.csv")
+# breathing_filtered = pd.read_csv("JacquieData1_20211126.csv")
+breathing_filtered = pd.read_csv("breathing_filtered.csv")
 # The original data is sampled at 2 kHz, this is way more than we need, so take only every 200 points (10 Hz)
 breathing_filtered_sparse = breathing_filtered[0::200]
 
 # Overall breathing data plot
 stomach_data = breathing_filtered_sparse["Stomach"]  # Get stomach data using "Stomach" key
 chest_data = breathing_filtered_sparse["Chest"]  # Get chest data using "Chest" key
+
+# Filter out high frequency noise above 20 Hz
+butt = butter(10, 20, 'low', fs=200, analog=False, output='sos')
+stomach_data = sosfilt(butt, stomach_data)
+chest_data = sosfilt(butt, chest_data)
+
 sample_rate = 10  # Sample rate in Hz (which is now 10 since we've taken every 200th point in a 2 kHz sample
 # Generate time point array since "Elapsed Time" in csv is strings, not floats
 time_points = [float(i/sample_rate) for i in range(len(breathing_filtered_sparse))]  # Generate time points
@@ -23,6 +29,7 @@ events = breathing_filtered_sparse["Event"]
 event_times = visualization.get_event_times(events, time_points)
 # Plot the data in the time domain for both channels
 visualization.plot_csv(stomach_data, chest_data, time_points, event_times)
+# visualization.plot_csv(stomach_data_filtered, chest_data_filtered, time_points, event_times)
 
 # Overall fft plot
 stomach_fft = fft(stomach_data.tolist())  # fft from stomach channel
@@ -67,7 +74,7 @@ for i in range(int(round(time_points[-1] - window_size)/window_step)):
 
     # Plot the FFTs, time domain data, and motor pulses in the same plot
     visualization.plot_fft_frame(N, stomach_fft, chest_fft, x_freq, fft_ax, stomach_data, chest_data,
-                                 time_points, window_step, window_size, i, motors)
+                                 time_points, event_times, window_step, window_size, i, motors)
 
 
 
