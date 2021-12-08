@@ -3,11 +3,10 @@ import time
 
 print("begin")
 
-ser = serial.Serial('COM4', 9800, timeout = 1)
+ser = serial.Serial('COM4')
 
 while True:
-    print("going")
-    ser.write(b'H')
-    time.sleep(1)
+    codein = str(input('Enter input: '))
+    ser.write(codein.encode('utf-8'))
 
 

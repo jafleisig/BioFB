@@ -5,6 +5,10 @@ from scipy.signal import find_peaks, butter, sosfilt
 import numpy as np
 from sklearn.neural_network import MLPClassifier
 from joblib import load
+import serial
+import time
+
+ser = serial.Serial('COM4')
 
 # Read the CSV
 # breathing_filtered = pd.read_csv("JacquieData1_20211126.csv")
@@ -92,9 +96,12 @@ while True:
             # rate = peaks[0].size/(len(stomach_sample)/200)
             if (peak_freq > max_bpm) and ((len(motors) == 1) or (abs(motors[-1]) < i-10)):
                 motors = motors + [-i]
+                ser.write('2'.encode('utf-8'))
+
             # If max power of chest is greater than 10 and there hasn't been a stimulus in the last 10 iterations
             elif (max(2.0 / N * np.abs(chest_fft[0:N // 2])) > 10) and ((len(motors) == 1) or (abs(motors[-1]) < i-10)):
                 motors = motors + [i]  # Record this as a motor start time
+                ser.write('1'.encode('utf-8'))
 
         # Plot the FFTs, time domain data, and motor pulses in the same plot
         visualization.plot_fft_frame(N, stomach_fft, chest_fft, x_freq, fft_ax, stomach_data, chest_data,
